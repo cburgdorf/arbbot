@@ -43,7 +43,7 @@ jobs:
         run: |
           yarn install --frozen-lockfile
           yarn add --dev typescript ts-node
-      - name: Run TypeScript Project
+      - name: Run Bot
         working-directory: ./arbzero
         run: yarn start
       
