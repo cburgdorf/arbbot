@@ -1,11 +1,11 @@
 name: Run base
 
-on:
-  schedule:
-    - cron:  '*/15 * * * *'
-  push:
-      branches:
-        - main
+# on:
+#   schedule:
+#     - cron:  '*/15 * * * *'
+#   push:
+#       branches:
+#         - main
 
 env:
 
