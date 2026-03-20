@@ -42,8 +42,8 @@ jobs:
       - name: Install Dependencies
         working-directory: ./arbzero
         run: |
+          yarn cache clean
           yarn install --frozen-lockfile
-          yarn add --dev typescript ts-node
       - name: Run Bot
         working-directory: ./arbzero
         run: yarn start
