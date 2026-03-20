@@ -1,11 +1,11 @@
 name: Run base wstETH/cbETH
 
-# on:
-#   schedule:
-#     - cron:  '*/15 * * * *'
-#   push:
-#       branches:
-#         - main
+on:
+  schedule:
+    - cron:  '*/15 * * * *'
+  push:
+      branches:
+        - main
 
 env:
   # A = wstETH, B = cbETH (Base)
