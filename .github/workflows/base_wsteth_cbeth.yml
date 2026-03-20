@@ -41,10 +41,7 @@ jobs:
           path: arbzero
       - name: Install Dependencies
         working-directory: ./arbzero
-        env:
-          YARN_CACHE_FOLDER: /tmp/yarn-cache
-        run: |
-          yarn install --frozen-lockfile --network-concurrency 1
+        run: npm ci
       - name: Run Bot
         working-directory: ./arbzero
-        run: yarn start
+        run: npm start
