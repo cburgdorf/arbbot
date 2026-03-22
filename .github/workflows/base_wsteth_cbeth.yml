@@ -9,15 +9,15 @@ on:
 
 env:
   # A = wstETH, B = cbETH (Base)
-  # Rates from screenzero backtest: 0.025% spread, conservative start
+  # Rates from screenzero backtest: 0.010% spread, 30d mean, fill overhead 0.181%/leg
   ARBZERO_APPCODE: "base_wsteth_cbeth"
   ARBZERO_TRADER: "0x2943ec8fb4e9b3e1ca73700869856be35aeee63e"
   ARBZERO_RPC_URL: ${{ secrets.BASE_RPC_URL }}
   ARBZERO_SIGNER: ${{ secrets.BASE_SIGNER_PK }}
   ARBZERO_TOKEN_A: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452"
   ARBZERO_TOKEN_B: "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22"
-  ARBZERO_A_TO_B_RATE: "1.092754"
-  ARBZERO_B_TO_A_RATE: "0.915576"
+  ARBZERO_A_TO_B_RATE: "1.092135"
+  ARBZERO_B_TO_A_RATE: "0.915821"
   ARBZERO_CHAIN: base
 
 jobs:
