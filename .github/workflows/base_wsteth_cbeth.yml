@@ -37,9 +37,16 @@ jobs:
           ref: main
           token: ${{ secrets.PAT_ANYONE_READS_ARBZERO }}
           path: arbzero
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: arbzero/node_modules
+          key: npm-${{ hashFiles('arbzero/package-lock.json') }}
+
       - name: Install Dependencies
         working-directory: ./arbzero
-        run: npm ci
+        run: npm ci --loglevel verbose
       - name: Run Bot
         working-directory: ./arbzero
         run: npm start
