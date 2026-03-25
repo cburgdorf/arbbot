@@ -9,13 +9,13 @@ on:
 
 env:
   # Home = wstETH, Satellite = cbETH (Base)
-  # Rates from screenzero backtest: 0.010% spread, 30d mean
+  # Rates from screenzero backtest: 0.005% spread, 30d mean
   ARBZERO_APPCODE: "base_wsteth_cbeth"
   ARBZERO_TRADER: "0x2943ec8fb4e9b3e1ca73700869856be35aeee63e"
   ARBZERO_RPC_URL: ${{ secrets.BASE_RPC_URL }}
   ARBZERO_SIGNER: ${{ secrets.BASE_SIGNER_PK }}
   ARBZERO_HOME_TOKEN: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452"
-  ARBZERO_SATELLITES: '[{"token":"0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22","sell_home_at":"1.092161","buy_home_at":"0.915799"}]'
+  ARBZERO_SATELLITES: '[{"token":"0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22","sell_home_at":"1.092144","buy_home_at":"0.915721"}]'
   ARBZERO_CHAIN: base
 
 jobs:
