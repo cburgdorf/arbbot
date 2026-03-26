@@ -16,6 +16,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_ARBBOT_WRITE }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
