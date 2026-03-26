@@ -12,10 +12,10 @@ env:
 jobs:
   calibrate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT_ANYONE_READS_ARBZERO }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
