@@ -9,7 +9,7 @@ on:
 
 env:
   # Home = wstETH, Satellite = cbETH (Base)
-  # Rates from screenzero backtest: 0.005% spread, 30d mean
+  ARBZERO_SPREAD: "0.005"
   ARBZERO_APPCODE: "base_wsteth_cbeth"
   ARBZERO_TRADER: "0x2943ec8fb4e9b3e1ca73700869856be35aeee63e"
   ARBZERO_RPC_URL: ${{ secrets.BASE_RPC_URL }}
