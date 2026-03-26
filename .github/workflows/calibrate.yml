@@ -1,0 +1,63 @@
+name: Calibrate rates
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # daily at 06:00 UTC
+  workflow_dispatch: {}   # manual trigger
+
+env:
+  # Maximum allowed rate deviation (%). Abort if exceeded.
+  MAX_DEVIATION_PCT: "1.0"
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_ANYONE_READS_ARBZERO }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Checkout screenzero
+        uses: actions/checkout@v4
+        with:
+          repository: trovezero/screenzero
+          ref: master
+          token: ${{ secrets.PAT_ANYONE_READS_ARBZERO }}
+          path: screenzero
+
+      - name: Cache screenzero build
+        uses: actions/cache@v4
+        with:
+          path: |
+            screenzero/target
+            ~/.cargo/registry
+          key: screenzero-${{ hashFiles('screenzero/Cargo.lock', 'screenzero/Cargo.toml') }}
+
+      - name: Cache screenzero API data
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/screenzero
+          key: screenzero-cache-${{ github.run_id }}
+          restore-keys: screenzero-cache-
+
+      - name: Build screenzero
+        working-directory: screenzero
+        run: cargo build --release
+
+      - name: Run calibration
+        run: |
+          ./scripts/calibrate.sh \
+            ./screenzero/target/release/screenzero \
+            .github/workflows
+
+      - name: Commit and push if changed
+        run: |
+          git diff --quiet && exit 0
+          git config user.name "arbbot-calibrator"
+          git config user.email "noreply@trovezero.com"
+          git add .github/workflows/
+          git commit -m "Calibrate rates $(date -u +%Y-%m-%d)"
+          git push
