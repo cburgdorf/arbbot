@@ -47,13 +47,13 @@ for workflow in "$WORKFLOW_DIR"/*.yml; do
     echo "  Satellite $idx: ${sat_token:0:10}... (current: sell=$old_sell buy=$old_buy)"
 
     # Build screenzero args
-    screenzero_args=(--chain "$chain" --tokens "$home_token,$sat_token" --days 30 --detail auto --json --spread "$spread")
+    screenzero_args=(--chain "$chain" --tokens "$home_token,$sat_token" --days 30 --detail auto --json --spread "$spread" --min-spread 0)
     if [ -n "$slippage" ]; then
       screenzero_args+=(--slippage "$slippage")
     fi
 
     # Run screenzero to get new rates
-    json_output=$("$SCREENZERO" "${screenzero_args[@]}" 2>/dev/null) || true
+    json_output=$("$SCREENZERO" "${screenzero_args[@]}") || true
 
     if [ -z "$json_output" ]; then
       echo "  WARNING: screenzero returned no output, skipping"
