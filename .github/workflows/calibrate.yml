@@ -8,6 +8,7 @@ on:
 env:
   # Maximum allowed rate deviation (%). Abort if exceeded.
   MAX_DEVIATION_PCT: "1.0"
+  COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
 
 jobs:
   calibrate:
