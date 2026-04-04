@@ -6,6 +6,9 @@
 # against fresh screenzero backtest results. Updates the workflow if rates
 # have changed, but aborts if the change exceeds MAX_DEVIATION_PCT (safety).
 #
+# Each satellite defines its own sell_spread and buy_spread so that
+# screenzero is invoked once per direction, allowing asymmetric spreads.
+#
 # Usage: ./scripts/calibrate.sh <screenzero_binary> <workflow_dir>
 #
 set -euo pipefail
@@ -24,47 +27,55 @@ for workflow in "$WORKFLOW_DIR"/*.yml; do
 
   # Extract config from workflow env vars
   chain=$(grep 'ARBZERO_CHAIN:' "$workflow" | head -1 | awk '{print $2}' | tr -d '"' || true)
-  spread=$(grep 'ARBZERO_SPREAD:' "$workflow" | head -1 | awk '{print $2}' | tr -d '"' || true)
   slippage=$(grep 'ARBZERO_SLIPPAGE:' "$workflow" | head -1 | awk '{print $2}' | tr -d '"' || true)
   home_token=$(grep 'ARBZERO_HOME_TOKEN:' "$workflow" | head -1 | awk '{print $2}' | tr -d '"' || true)
   satellites_json=$(grep 'ARBZERO_SATELLITES:' "$workflow" | head -1 | sed "s/.*ARBZERO_SATELLITES: *'//;s/'.*//") || true
 
-  if [ -z "$chain" ] || [ -z "$spread" ] || [ -z "$home_token" ] || [ -z "$satellites_json" ]; then
-    echo "  Skipping: missing required env vars (CHAIN, SPREAD, HOME_TOKEN, SATELLITES)"
+  if [ -z "$chain" ] || [ -z "$home_token" ] || [ -z "$satellites_json" ]; then
+    echo "  Skipping: missing required env vars (CHAIN, HOME_TOKEN, SATELLITES)"
     continue
   fi
 
-  echo "  Chain: $chain, Spread: $spread%, Home: ${home_token:0:10}..."
+  echo "  Chain: $chain, Home: ${home_token:0:10}..."
 
   # Process each satellite
   num_satellites=$(echo "$satellites_json" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))")
 
   for idx in $(seq 0 $((num_satellites - 1))); do
     sat_token=$(echo "$satellites_json" | python3 -c "import sys,json; print(json.load(sys.stdin)[$idx]['token'])")
+    sell_spread=$(echo "$satellites_json" | python3 -c "import sys,json; print(json.load(sys.stdin)[$idx]['sell_spread'])")
+    buy_spread=$(echo "$satellites_json" | python3 -c "import sys,json; print(json.load(sys.stdin)[$idx]['buy_spread'])")
     old_sell=$(echo "$satellites_json" | python3 -c "import sys,json; print(json.load(sys.stdin)[$idx]['sell_home_at'])")
     old_buy=$(echo "$satellites_json" | python3 -c "import sys,json; print(json.load(sys.stdin)[$idx]['buy_home_at'])")
 
-    echo "  Satellite $idx: ${sat_token:0:10}... (current: sell=$old_sell buy=$old_buy)"
+    echo "  Satellite $idx: ${sat_token:0:10}... (current: sell=$old_sell buy=$old_buy, spreads: sell=$sell_spread% buy=$buy_spread%)"
 
-    # Build screenzero args
-    screenzero_args=(--chain "$chain" --tokens "$home_token,$sat_token" --days 30 --detail auto --json --spread "$spread" --min-spread 0)
+    # Common screenzero args
+    base_args=(--chain "$chain" --tokens "$home_token,$sat_token" --days 30 --detail auto --json --min-spread 0)
     if [ -n "$slippage" ]; then
-      screenzero_args+=(--slippage "$slippage")
+      base_args+=(--slippage "$slippage")
     fi
 
-    # Run screenzero to get new rates
-    json_output=$("$SCREENZERO" "${screenzero_args[@]}") || true
-
-    if [ -z "$json_output" ]; then
-      echo "  WARNING: screenzero returned no output, skipping"
+    # Run screenzero for sell direction
+    sell_output=$("$SCREENZERO" "${base_args[@]}" --spread "$sell_spread") || true
+    if [ -z "$sell_output" ]; then
+      echo "  WARNING: screenzero returned no output for sell spread, skipping"
       continue
     fi
 
-    new_sell=$(echo "$json_output" | python3 -c "import sys,json; print(json.load(sys.stdin)['sell_home_at'])")
-    new_buy=$(echo "$json_output" | python3 -c "import sys,json; print(json.load(sys.stdin)['buy_home_at'])")
-    strategy=$(echo "$json_output" | python3 -c "import sys,json; print(json.load(sys.stdin)['strategy'])")
+    # Run screenzero for buy direction
+    buy_output=$("$SCREENZERO" "${base_args[@]}" --spread "$buy_spread") || true
+    if [ -z "$buy_output" ]; then
+      echo "  WARNING: screenzero returned no output for buy spread, skipping"
+      continue
+    fi
 
-    echo "  New rates: sell=$new_sell buy=$new_buy (strategy: $strategy)"
+    new_sell=$(echo "$sell_output" | python3 -c "import sys,json; print(json.load(sys.stdin)['sell_home_at'])")
+    new_buy=$(echo "$buy_output" | python3 -c "import sys,json; print(json.load(sys.stdin)['buy_home_at'])")
+    sell_strategy=$(echo "$sell_output" | python3 -c "import sys,json; print(json.load(sys.stdin)['strategy'])")
+    buy_strategy=$(echo "$buy_output" | python3 -c "import sys,json; print(json.load(sys.stdin)['strategy'])")
+
+    echo "  New rates: sell=$new_sell (strategy: $sell_strategy) buy=$new_buy (strategy: $buy_strategy)"
 
     # Safety check: abort if deviation is too large
     python3 -c "
