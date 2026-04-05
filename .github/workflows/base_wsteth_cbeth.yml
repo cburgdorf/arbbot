@@ -14,7 +14,7 @@ env:
   ARBZERO_RPC_URL: ${{ secrets.BASE_RPC_URL }}
   ARBZERO_SIGNER: ${{ secrets.BASE_SIGNER_PK }}
   ARBZERO_HOME_TOKEN: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452"
-  ARBZERO_SATELLITES: '[{"token": "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22", "sell_spread": "0.001", "buy_spread": "0.002", "sell_home_at": "1.092360", "buy_home_at": "0.915475"}]'
+  ARBZERO_SATELLITES: '[{"token": "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22", "sell_spread": "0.001", "buy_spread": "0.002", "sell_home_at": "1.092370", "buy_home_at": "0.915466"}]'
   ARBZERO_CHAIN: base
 
 jobs:
